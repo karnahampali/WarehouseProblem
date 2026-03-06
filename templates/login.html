@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | RouteMaster</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+        .glow-input:focus {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-[#0b1120] text-slate-300 min-h-screen flex items-center justify-center p-6 selection:bg-blue-500/30">
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/10 rounded-full blur-[120px]"></div>
+    </div>
+
+    <div class="w-full max-w-md glass rounded-3xl shadow-2xl p-10 transform transition-all">
+        <div class="text-center mb-10">
+            <h1 class="text-xs font-black tracking-[0.3em] text-blue-500 uppercase mb-2">System Access</h1>
+            <h2 id="title" class="text-4xl font-black text-white tracking-tighter uppercase">Sign In</h2>
+            <div class="h-1 w-12 bg-blue-600 mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        <div class="space-y-5">
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase ml-1 mb-2 block">Network Identity</label>
+                <input type="email" id="email" placeholder="name@company.com" 
+                    class="w-full p-4 rounded-xl bg-slate-900/50 border border-slate-700 outline-none glow-input transition-all text-sm font-mono placeholder:text-slate-600">
+            </div>
+            
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase ml-1 mb-2 block">Security Protocol</label>
+                <input type="password" id="password" placeholder="••••••••" 
+                    class="w-full p-4 rounded-xl bg-slate-900/50 border border-slate-700 outline-none glow-input transition-all text-sm font-mono placeholder:text-slate-600">
+            </div>
+
+            <button id="btn" onclick="handleAuth()" 
+                class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98] mt-4">
+                Initialize Session
+            </button>
+        </div>
+
+        <p class="mt-8 text-center text-xs font-medium text-slate-500">
+            <span id="toggle-text">New to the terminal?</span> 
+            <button onclick="toggleMode()" id="toggle" class="text-blue-400 hover:text-blue-300 font-bold ml-1 transition">Create Account</button>
+        </p>
+
+        <div id="err" class="mt-6 p-4 bg-red-900/20 border border-red-500/50 text-red-400 text-[11px] font-bold rounded-xl hidden text-center uppercase tracking-tight"></div>
+    </div>
+
+    <script>
+        let supabaseClient;
+        let isLogin = true;
+
+        async function initAuth() {
+            try {
+                const res = await fetch('/api/config');
+                const config = await res.json();
+                supabaseClient = supabase.createClient(config.url, config.key);
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) window.location.href = "/";
+            } catch (e) { console.error(e); }
+        }
+
+        function toggleMode() {
+            isLogin = !isLogin;
+            const title = document.getElementById('title');
+            const toggle = document.getElementById('toggle');
+            const toggleText = document.getElementById('toggle-text');
+            const btn = document.getElementById('btn');
+
+            title.innerText = isLogin ? "Sign In" : "Sign Up";
+            toggle.innerText = isLogin ? "Create Account" : "Use Existing";
+            toggleText.innerText = isLogin ? "New to the terminal?" : "Already verified?";
+            btn.innerText = isLogin ? "Initialize Session" : "Generate Profile";
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const err = document.getElementById('err');
+            const btn = document.getElementById('btn');
+            
+            if (!supabaseClient) return;
+            
+            // UI Feedback
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+            err.classList.add('hidden');
+
+            const { data, error } = isLogin 
+                ? await supabaseClient.auth.signInWithPassword({ email, password })
+                : await supabaseClient.auth.signUp({ email, password });
+
+            if (error) {
+                err.innerText = error.message;
+                err.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerText = isLogin ? "Initialize Session" : "Generate Profile";
+            } else {
+                window.location.href = "/";
+            }
+        }
+
+        initAuth();
+    </script>
+</body>
+</html>
