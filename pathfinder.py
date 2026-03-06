@@ -1,29 +1,39 @@
-from collections import deque
+import heapq
 
-def get_shortest_path(grid, start, end):
+def a_star(grid, start, target):
     rows, cols = len(grid), len(grid[0])
-    queue = deque([(tuple(start), [tuple(start)])])
-    visited = {tuple(start)}
-    while queue:
-        (r, c), path = queue.popleft()
-        if (r, c) == tuple(end): return path
-        for dr, dc in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
-            nr, nc = r + dr, c + dc
-            if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] != 1 and (nr, nc) not in visited:
-                visited.add((nr, nc))
-                queue.append(((nr, nc), path + [(nr, nc)]))
-    return None
+    frontier = []
+    start_t, target_t = tuple(start), tuple(target)
+    heapq.heappush(frontier, (0, start_t))
+    came_from = {start_t: None}
+    cost_so_far = {start_t: 0}
+
+    while frontier:
+        _, current = heapq.heappop(frontier)
+        if current == target_t: break
+        for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+            nr, nc = current[0] + dr, current[1] + dc
+            if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] != 1:
+                next_node = (nr, nc)
+                new_cost = cost_so_far[current] + 1
+                if next_node not in cost_so_far or new_cost < cost_so_far[next_node]:
+                    cost_so_far[next_node] = new_cost
+                    priority = new_cost + abs(nr - target[0]) + abs(nc - target[1])
+                    heapq.heappush(frontier, (priority, next_node))
+                    came_from[next_node] = current
+    
+    if target_t not in came_from: return None
+    path, curr = [], target_t
+    while curr:
+        path.append(list(curr))
+        curr = came_from[curr]
+    return path[::-1]
 
 def solve_route(grid, start, targets):
-    current_pos = tuple(start)
-    remaining_targets = [tuple(t) for t in targets]
-    full_path = [current_pos]
-    total_steps = 0
-    if not remaining_targets: return {"status": "error", "message": "No targets set"}
-    for target in remaining_targets:
-        path = get_shortest_path(grid, current_pos, target)
-        if path is None: return {"status": "impossible", "message": "Impossible to approach target"}
-        full_path.extend(path[1:])
-        total_steps += len(path) - 1
-        current_pos = target
-    return {"status": "success", "total_steps": total_steps, "path": [list(p) for p in full_path], "targets_collected": len(targets)}
+    full_path, curr_start = [], start
+    for i, t in enumerate(targets):
+        segment = a_star(grid, curr_start, t)
+        if segment is None: return None
+        full_path.extend(segment if i == 0 else segment[1:])
+        curr_start = t
+    return full_path
