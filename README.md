@@ -27,7 +27,7 @@ RouteMaster Pro is a high-performance warehouse pathfinding application designed
 
 1. **Clone the repository**:
 ```bash
-git clone <https://github.com/karnahampali/WarehouseProblem>
+git clone https://github.com/karnahampali/WarehouseProblem
 cd routemaster
 
 ```
