@@ -1,5 +1,4 @@
 import sqlite3
-import json
 from flask import g
 
 def get_db():
@@ -21,3 +20,7 @@ def init_db():
         )
     ''')
     db.commit()
+
+def close_db(e=None):
+    db = g.pop('db', None)
+    if db is not None: db.close()
