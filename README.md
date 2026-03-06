@@ -39,16 +39,7 @@ pip install -r requirements.txt
 ```
 
 
-3. **Configure Environment**:
-Create a `.env` file in the root directory and add your Supabase credentials:
-```env
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-
-```
-
-
-4. **Initialize Database & Run**:
+3. **Initialize Database & Run**:
 ```bash
 python app.py
 
