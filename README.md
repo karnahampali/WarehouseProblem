@@ -1,6 +1,6 @@
 # RouteMaster Pro | Intelligent Warehouse Logistics
 
-RouteMaster Pro is a high-performance warehouse pathfinding application designed for the 2026 Hackarena. It utilizes a **Breadth-First Search (BFS)** algorithm to calculate the most efficient route for pickers while handling dynamic obstacles and providing high-fidelity visual datasheets.
+RouteMaster Pro is a high-performance warehouse pathfinding application designed for the 2026 Hackarena. It utilizes a **Breadth-First Search (BFS)** algorithm to calculate the most efficient route for pickers while handling dynamic obstacles and providing high-fidelity visual datasheets 
 
 ---
 
